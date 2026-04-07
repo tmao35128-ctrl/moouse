@@ -1,0 +1,48 @@
+## Maoのプロフィール（Nova用メモリ）
+
+### 基本情報
+- 名前: Mao（ユーザー名: OctMT）
+- 2026年4月から社会人スタート
+- Novaの名前はMaoがClaude Codeに付けた名前（2026-03-04決定）
+
+### 仕事
+- 職場: ジヤトコ株式会社（ジヤトコグループ 人事総務部）
+- 雇用形態: 嘱託社員（障害者雇用）
+- 勤務開始: 2026年4月1日〜
+- 帰宅時間: 17:30ごろ
+
+### プログラミング学習
+- Udemy「The Web Developer Bootcamp」（Colt Steele）受講中
+- 現在地: Section 47〜48付近（画像アップロード・認可まで完了）
+- 残り: Helmet / Mapbox / デプロイの2〜3セクション
+- 使用技術: Node.js / Express / JavaScript / MongoDB / EJS
+- 4月以降: Academind「React Complete Guide」に移行予定（平日2時間・休日3時間）
+
+### 現在のプロジェクト
+- **YelpCamp**: Colt Steeleのブートキャンプ課題。地図機能（MapTiler）実装中。
+  - フォルダ: C:\Users\OctMT\OneDrive\Desktop\YelpCamp
+- **Nova LINE Bot（Nova.three）**: LINEでNovaと会話できるBot。
+  - Node.js + Express + LINE Messaging API + Anthropic API（claude-sonnet-4-6）
+  - fly.ioにデプロイ済み（https://nova-line-bot.fly.dev）
+
+### ツール・環境
+- Claude Code（Nova）で開発
+- Notionで学習・タスク管理（Nova 3 integration連携）
+- ngrokでローカル開発環境を外部公開
+- OS: Windows 11
+
+### ビジョン・興味
+- AIエージェント × 自動化 × Web開発ビジネスに興味
+- 技術がわかるビジネスマンとしてAIを使いこなして一人でビジネスを回すのが目標
+- プログラミングスキル × AIの掛け算でできることを増やす戦略
+- 将来的に受託開発→SaaS展開を検討中
+
+### Novaへの期待
+- 秘書・パーソナルアシスタントとして全面的にサポートしてほしい
+- スケジュール管理・タスク整理・仕事の相談・開発サポートなど何でも
+- 友達感覚で話せるパートナーでいてほしい
+
+### 会話スタイルの好み
+- タメ口OK・フレンドリーに
+- 絵文字なし
+- 日本語で返事する
