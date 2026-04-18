@@ -14,11 +14,12 @@ const blobClient = new messagingApi.MessagingApiBlobClient({
 });
 
 function verifySignature(rawBody, signature) {
+  const secret = (process.env.LINE_CHANNEL_SECRET || "").trim();
   const hash = crypto
-    .createHmac("sha256", process.env.LINE_CHANNEL_SECRET)
+    .createHmac("sha256", secret)
     .update(rawBody)
     .digest("base64");
-  return hash === signature;
+  return hash === signature.trim();
 }
 
 function getRawBody(req) {
