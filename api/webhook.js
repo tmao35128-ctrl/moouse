@@ -23,10 +23,17 @@ function verifySignature(rawBody, signature) {
 
 function getRawBody(req) {
   return new Promise((resolve, reject) => {
+    // bodyParserが既にパースしている場合
+    if (req.body !== undefined) {
+      const str = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
+      return resolve(Buffer.from(str));
+    }
     const chunks = [];
     req.on("data", chunk => chunks.push(chunk));
     req.on("end", () => resolve(Buffer.concat(chunks)));
     req.on("error", reject);
+    // 5秒タイムアウト
+    setTimeout(() => resolve(Buffer.concat(chunks)), 5000);
   });
 }
 
