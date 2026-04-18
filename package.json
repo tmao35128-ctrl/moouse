@@ -15,6 +15,7 @@
     "@anthropic-ai/sdk": "^0.78.0",
     "@line/bot-sdk": "^10.6.0",
     "@notionhq/client": "^5.16.0",
+    "@upstash/redis": "^1.37.0",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "form-data": "^4.0.5"
