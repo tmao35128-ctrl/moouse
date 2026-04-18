@@ -5,12 +5,14 @@ const https = require("https");
 const { getHistory, addToHistory, clearHistory, saveUserId } = require("../lib/history");
 const { runWithTools } = require("../lib/claude");
 
+const LINE_TOKEN = (process.env.LINE_CHANNEL_ACCESS_TOKEN || "").trim();
+
 const client = new messagingApi.MessagingApiClient({
-  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+  channelAccessToken: LINE_TOKEN,
 });
 
 const blobClient = new messagingApi.MessagingApiBlobClient({
-  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+  channelAccessToken: LINE_TOKEN,
 });
 
 function verifySignature(rawBody, signature) {

@@ -40,7 +40,7 @@ function notionRequest(method, endpoint, body) {
       method,
       headers: {
         Authorization: `Bearer ${NOTION_TOKEN}`,
-        "Notion-Version": "2025-09-03",
+        "Notion-Version": "2022-06-28",
         "Content-Type": "application/json",
         ...(data ? { "Content-Length": Buffer.byteLength(data) } : {}),
       },
@@ -576,10 +576,14 @@ async function handleMessage(event) {
   addToHistory(userId, "user", userMessage);
   addToHistory(userId, "assistant", replyText);
 
-  await client.replyMessage({
-    replyToken: event.replyToken,
-    messages: [{ type: "text", text: replyText }],
-  });
+  try {
+    await client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [{ type: "text", text: replyText }],
+    });
+  } catch (err) {
+    console.error("replyMessage error (text):", err.message);
+  }
 }
 
 async function checkReminders() {
@@ -689,10 +693,14 @@ async function handleAudioMessage(event) {
   addToHistory(userId, "user", audioMsg);
   addToHistory(userId, "assistant", replyText);
 
-  await client.replyMessage({
-    replyToken: event.replyToken,
-    messages: [{ type: "text", text: replyText }],
-  });
+  try {
+    await client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [{ type: "text", text: replyText }],
+    });
+  } catch (err) {
+    console.error("replyMessage error (audio):", err.message);
+  }
 }
 
 async function handleImageMessage(event) {
@@ -725,10 +733,14 @@ async function handleImageMessage(event) {
   addToHistory(userId, "user", imageContent);
   addToHistory(userId, "assistant", replyText);
 
-  await client.replyMessage({
-    replyToken: event.replyToken,
-    messages: [{ type: "text", text: replyText }],
-  });
+  try {
+    await client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [{ type: "text", text: replyText }],
+    });
+  } catch (err) {
+    console.error("replyMessage error (image):", err.message);
+  }
 }
 
 const PORT = process.env.PORT || 3000;
