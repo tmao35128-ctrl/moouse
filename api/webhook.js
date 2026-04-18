@@ -213,11 +213,9 @@ const handler = async (req, res) => {
     return res.status(400).end();
   }
 
-  res.status(200).end();
-
   const events = body.events || [];
-  for (const event of events) {
-    if (event.type !== "message") continue;
+  await Promise.all(events.map(async (event) => {
+    if (event.type !== "message") return;
     try {
       if (event.message.type === "text") await handleText(event);
       else if (event.message.type === "image") await handleImage(event);
@@ -225,7 +223,9 @@ const handler = async (req, res) => {
     } catch (err) {
       console.error("Event handler error:", err.message);
     }
-  }
+  }));
+
+  res.status(200).end();
 };
 
 handler.config = { api: { bodyParser: false } };
