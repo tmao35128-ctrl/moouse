@@ -1,13 +1,9 @@
-const { middleware, messagingApi } = require("@line/bot-sdk");
+const crypto = require("crypto");
+const { messagingApi } = require("@line/bot-sdk");
 const FormData = require("form-data");
 const https = require("https");
 const { getHistory, addToHistory, clearHistory, saveUserId } = require("../lib/history");
 const { runWithTools } = require("../lib/claude");
-
-const lineConfig = {
-  channelSecret: process.env.LINE_CHANNEL_SECRET,
-  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
-};
 
 const client = new messagingApi.MessagingApiClient({
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
@@ -16,6 +12,23 @@ const client = new messagingApi.MessagingApiClient({
 const blobClient = new messagingApi.MessagingApiBlobClient({
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
 });
+
+function verifySignature(rawBody, signature) {
+  const hash = crypto
+    .createHmac("sha256", process.env.LINE_CHANNEL_SECRET)
+    .update(rawBody)
+    .digest("base64");
+  return hash === signature;
+}
+
+function getRawBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on("data", chunk => chunks.push(chunk));
+    req.on("end", () => resolve(Buffer.concat(chunks)));
+    req.on("error", reject);
+  });
+}
 
 async function transcribeAudio(buffer) {
   const form = new FormData();
@@ -102,7 +115,6 @@ async function handleImage(event) {
     console.error("handleImage error:", err.message);
     replyText = "エラーが発生した。もう一度試してみて。";
   }
-
   await addToHistory(userId, "user", "（画像を送信）");
   await addToHistory(userId, "assistant", replyText);
   try {
@@ -166,31 +178,43 @@ async function handleAudio(event) {
   }
 }
 
-const lineMiddleware = middleware(lineConfig);
-
 const handler = async (req, res) => {
   if (req.method !== "POST") return res.status(405).end();
 
-  await new Promise((resolve, reject) => {
-    lineMiddleware(req, res, (err) => {
-      if (err) reject(err);
-      else resolve();
-    });
-  }).catch(err => {
-    console.error("Middleware error:", err.message);
-    res.status(400).end();
-    return;
-  });
+  let rawBody;
+  try {
+    rawBody = await getRawBody(req);
+  } catch (err) {
+    console.error("getRawBody error:", err.message);
+    return res.status(500).end();
+  }
 
-  if (res.headersSent) return;
+  const signature = req.headers["x-line-signature"];
+  if (!signature || !verifySignature(rawBody, signature)) {
+    console.error("Invalid signature");
+    return res.status(400).end();
+  }
+
+  let body;
+  try {
+    body = JSON.parse(rawBody.toString("utf8"));
+  } catch (err) {
+    console.error("JSON parse error:", err.message);
+    return res.status(400).end();
+  }
+
   res.status(200).end();
 
-  const events = req.body.events || [];
+  const events = body.events || [];
   for (const event of events) {
     if (event.type !== "message") continue;
-    if (event.message.type === "text") await handleText(event);
-    else if (event.message.type === "image") await handleImage(event);
-    else if (event.message.type === "audio") await handleAudio(event);
+    try {
+      if (event.message.type === "text") await handleText(event);
+      else if (event.message.type === "image") await handleImage(event);
+      else if (event.message.type === "audio") await handleAudio(event);
+    } catch (err) {
+      console.error("Event handler error:", err.message);
+    }
   }
 };
 
