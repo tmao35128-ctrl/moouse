@@ -168,7 +168,7 @@ async function handleAudio(event) {
 
 const lineMiddleware = middleware(lineConfig);
 
-module.exports = async (req, res) => {
+const handler = async (req, res) => {
   if (req.method !== "POST") return res.status(405).end();
 
   await new Promise((resolve, reject) => {
@@ -193,3 +193,6 @@ module.exports = async (req, res) => {
     else if (event.message.type === "audio") await handleAudio(event);
   }
 };
+
+handler.config = { api: { bodyParser: false } };
+module.exports = handler;
