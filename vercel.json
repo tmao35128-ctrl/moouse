@@ -1,4 +1,8 @@
 {
+  "functions": {
+    "api/webhook.js": { "maxDuration": 60 },
+    "api/check-reminders.js": { "maxDuration": 30 }
+  },
   "rewrites": [
     { "source": "/webhook", "destination": "/api/webhook" },
     { "source": "/check-reminders", "destination": "/api/check-reminders" }
