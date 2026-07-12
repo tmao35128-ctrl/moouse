@@ -3,7 +3,7 @@ const { messagingApi } = require("@line/bot-sdk");
 const FormData = require("form-data");
 const https = require("https");
 const { getHistory, addToHistory, clearHistory, saveUserId } = require("../lib/history");
-const { runWithTools } = require("../lib/claude");
+const { runWithTools, describeImage } = require("../lib/claude");
 
 const LINE_TOKEN = (process.env.LINE_CHANNEL_ACCESS_TOKEN || "").trim();
 
@@ -43,15 +43,15 @@ function getRawBody(req) {
 async function transcribeAudio(buffer) {
   const form = new FormData();
   form.append("file", buffer, { filename: "audio.m4a", contentType: "audio/m4a" });
-  form.append("model", "whisper-1");
+  form.append("model", "whisper-large-v3"); // Groq無料枠のWhisper
   form.append("language", "ja");
   return new Promise((resolve, reject) => {
     const req = https.request({
-      hostname: "api.openai.com",
-      path: "/v1/audio/transcriptions",
+      hostname: "api.groq.com",
+      path: "/openai/v1/audio/transcriptions",
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${(process.env.GROQ_API_KEY || "").trim()}`,
         ...form.getHeaders(),
       },
     }, res => {
@@ -111,19 +111,17 @@ async function handleImage(event) {
   for await (const chunk of stream) chunks.push(chunk);
   const base64 = Buffer.concat(chunks).toString("base64");
 
-  const imageContent = [
-    { type: "image", source: { type: "base64", media_type: "image/jpeg", data: base64 } },
-    { type: "text", text: "この画像を見てください" },
-  ];
-
   const history = await getHistory(userId);
-  const messages = [...history, { role: "user", content: imageContent }];
   let replyText;
   try {
+    // 画像はビジョンモデルでテキスト抽出 → 通常のツールループに渡してNotion保存
+    const extracted = await describeImage(base64, "image/jpeg");
+    const userMsg = `（画像を送信）画像から読み取った内容:\n${extracted}\n\nこの内容を適切にNotion（タスク/予定/メモ）へ保存して。`;
+    const messages = [...history, { role: "user", content: userMsg }];
     replyText = await runWithTools(messages);
   } catch (err) {
     console.error("handleImage error:", err.message);
-    replyText = "エラーが発生した。もう一度試してみて。";
+    replyText = "画像の読み取りでエラーが発生した。もう一度試してみて。";
   }
   await addToHistory(userId, "user", "（画像を送信）");
   await addToHistory(userId, "assistant", replyText);
